@@ -1,9 +1,9 @@
 import * as THREE from 'three';
 
-// Hyper-Realistic Godzilla: Anatomically proportioned kaiju rig with
-// predatory theropod posture, crocodilian skull & jaw, ivory fangs,
-// muscular forward-reaching clawed arms, dinosaurian taloned feet,
-// dynamic articulated tail, and iconic knife-sharp obsidian dorsal plates.
+// Hyper-Realistic Movie Godzilla:
+// Seamless lofted muscular torso, sculpted crocodilian skull and articulated jaw,
+// overlapping armored tail scutes, muscular brawler arms, tree-trunk theropod legs,
+// and iconic jagged coral/maple-leaf obsidian dorsal plates.
 
 export class Godzilla {
   constructor(scene, skin, spineTex = null) {
@@ -17,59 +17,61 @@ export class Godzilla {
       bumpMap: skin.bump,
       bumpScale: 1.5,
       roughness: 0.58,
-      metalness: 0.22,
+      metalness: 0.2,
       color: 0xffffff,
       emissive: 0xff3808,
       emissiveMap: skin.cracks,
-      emissiveIntensity: 0.1 // very subtle embers at rest, surges during charge
+      emissiveIntensity: 0.08
     });
 
     this.bellyMat = new THREE.MeshStandardMaterial({
       map: skin.map,
       bumpMap: skin.bump,
-      bumpScale: 0.9,
-      roughness: 0.62,
+      bumpScale: 1.0,
+      roughness: 0.64,
       metalness: 0.15,
       color: 0x9b857a,
       emissive: 0xff2500,
       emissiveMap: skin.cracks,
-      emissiveIntensity: 0.08
+      emissiveIntensity: 0.06
     });
 
-    // Dark obsidian dorsal plates with radioactive molten core
+    // Dark obsidian stone dorsal plates with internal radioactive core
     this.spineMat = new THREE.MeshStandardMaterial({
       map: spineTex,
       emissiveMap: spineTex,
       color: 0x181a20,
-      roughness: 0.42,
+      roughness: 0.45,
       metalness: 0.55,
       emissive: 0xff4400,
-      emissiveIntensity: 0.15 // surges to 4.2 during atomic breath
+      emissiveIntensity: 0.15
     });
 
     // Wet reptilian eye with slit pupil
     this.eyeMat = new THREE.MeshStandardMaterial({
       color: 0xffaa22,
       emissive: 0xff7700,
-      emissiveIntensity: 1.8,
-      roughness: 0.12,
-      metalness: 0.2
+      emissiveIntensity: 2.2,
+      roughness: 0.1,
+      metalness: 0.25
     });
 
     this.teethMat = new THREE.MeshStandardMaterial({
       color: 0xeee6d6,
-      roughness: 0.32,
+      roughness: 0.3,
       metalness: 0.05
     });
 
     this.clawMat = new THREE.MeshStandardMaterial({
       color: 0x14161a,
-      roughness: 0.28,
-      metalness: 0.65
+      roughness: 0.25,
+      metalness: 0.7
     });
 
+    // Forward-leaning theropod battle posture
     this.body = new THREE.Group();
-    this.body.rotation.x = 0.12; // Natural forward-leaning theropod posture
+    this.body.position.set(0, 0, 0);
+    this.body.rotation.x = 0.14;
     this.root.add(this.body);
 
     const S = (geo, mat, x, y, z) => {
@@ -80,138 +82,132 @@ export class Godzilla {
       return m;
     };
 
-    // ---------- Torso & Anatomy ----------
-    // Massive Pelvis / Hips
-    this.hips = S(new THREE.SphereGeometry(3.4, 28, 20), this.skinMat, 0, 9.4, -0.6);
-    this.hips.scale.set(1.25, 0.95, 1.15);
+    // ---------- Seamless Muscular Lofted Torso ----------
+    const torsoGeo = this.createLoftedTorsoGeometry();
+    this.torsoMesh = new THREE.Mesh(torsoGeo, this.skinMat);
+    this.torsoMesh.castShadow = true;
+    this.torsoMesh.receiveShadow = true;
+    this.body.add(this.torsoMesh);
 
-    // Abdomen / Midsection
-    this.torso = S(new THREE.SphereGeometry(3.6, 28, 20), this.skinMat, 0, 13.0, 0.2);
-    this.torso.scale.set(1.12, 1.25, 1.05);
+    // Sculpted Pectoral Armor Plates
+    const pecGeo = new THREE.SphereGeometry(1.6, 20, 16);
+    this.pecL = S(pecGeo, this.skinMat, -1.4, 15.6, 2.2);
+    this.pecL.scale.set(0.95, 0.85, 0.5);
+    this.pecL.rotation.y = 0.25;
 
-    // Muscular Upper Chest & Pectoral Plates
-    this.chest = S(new THREE.SphereGeometry(3.5, 28, 20), this.skinMat, 0, 16.2, 0.9);
-    this.chest.scale.set(1.15, 1.05, 1.0);
-
-    // Powerful Trapezius / Dorsal Ridge Hump
-    const trapezius = S(new THREE.SphereGeometry(2.9, 24, 18), this.skinMat, 0, 17.2, -0.8);
-    trapezius.scale.set(1.08, 0.95, 0.9);
+    this.pecR = S(pecGeo, this.skinMat, 1.4, 15.6, 2.2);
+    this.pecR.scale.set(0.95, 0.85, 0.5);
+    this.pecR.rotation.y = -0.25;
 
     // Armored Belly Gastralia Scutes
-    const belly = S(new THREE.SphereGeometry(3.1, 24, 18), this.bellyMat, 0, 13.0, 1.6);
-    belly.scale.set(0.9, 1.25, 0.7);
+    const bellyGeo = new THREE.SphereGeometry(2.4, 20, 16);
+    this.bellyMesh = S(bellyGeo, this.bellyMat, 0, 12.6, 2.2);
+    this.bellyMesh.scale.set(0.9, 1.3, 0.5);
 
-    this.body.add(this.hips, this.torso, this.chest, trapezius, belly);
+    this.body.add(this.pecL, this.pecR, this.bellyMesh);
 
-    // ---------- Neck & Crocodilian Head ----------
-    this.neck = new THREE.Group();
-    this.neck.position.set(0, 18.2, 1.2);
-    this.neck.rotation.x = -0.22;
-    this.body.add(this.neck);
-
-    const neckLower = S(new THREE.CylinderGeometry(2.0, 2.7, 2.8, 20), this.skinMat, 0, 1.1, 0.1);
-    const neckUpper = S(new THREE.CylinderGeometry(1.7, 2.1, 2.6, 20), this.skinMat, 0, 2.8, 0.4);
-    neckUpper.rotation.x = 0.12;
-    this.neck.add(neckLower, neckUpper);
-
+    // ---------- Sculpted Crocodilian Head & Articulated Jaw ----------
     this.head = new THREE.Group();
-    this.head.position.set(0, 4.2, 0.85);
-    this.neck.add(this.head);
+    this.head.position.set(0, 21.6, 0.85);
+    this.head.rotation.x = -0.08;
+    this.body.add(this.head);
 
-    // Sculpted Theropod / Crocodilian Cranium
-    const skull = S(new THREE.SphereGeometry(2.1, 26, 18), this.skinMat, 0, 0.45, 0.5);
-    skull.scale.set(1.02, 0.92, 1.25);
+    // Sculpted Crocodilian Cranium & Snout
+    const headGeo = this.createHeadGeometry();
+    this.headMesh = new THREE.Mesh(headGeo, this.skinMat);
+    this.headMesh.castShadow = true;
+    this.headMesh.receiveShadow = true;
+    this.head.add(this.headMesh);
 
-    // Rounded Crocodilian Snout
-    const snout = S(new THREE.SphereGeometry(1.45, 22, 16), this.skinMat, 0, 0.15, 2.3);
-    snout.scale.set(1.08, 0.76, 1.35);
+    // Flared Nostrils
+    const nostrilL = S(new THREE.SphereGeometry(0.18, 10, 8), this.skinMat, -0.45, 0.35, 3.2);
+    const nostrilR = S(new THREE.SphereGeometry(0.18, 10, 8), this.skinMat, 0.45, 0.35, 3.2);
 
-    // Nostrils on snout tip
-    const nostrilL = S(new THREE.SphereGeometry(0.18, 10, 8), this.skinMat, -0.42, 0.42, 3.8);
-    const nostrilR = S(new THREE.SphereGeometry(0.18, 10, 8), this.skinMat, 0.42, 0.42, 3.8);
-
-    // Heavy Supraorbital Brow Ridges
-    const browGeo = new THREE.BoxGeometry(0.9, 0.35, 1.0);
-    const browL = S(browGeo, this.skinMat, -0.88, 0.85, 1.4);
-    const browR = S(browGeo, this.skinMat, 0.88, 0.85, 1.4);
+    // Heavy Supraorbital Brow Crests
+    const browGeo = new THREE.BoxGeometry(1.1, 0.42, 1.1);
+    const browL = S(browGeo, this.skinMat, -0.96, 0.72, 1.15);
+    const browR = S(browGeo, this.skinMat, 0.96, 0.72, 1.15);
     browL.rotation.z = 0.22;
-    browL.rotation.y = 0.15;
+    browL.rotation.y = 0.14;
     browR.rotation.z = -0.22;
-    browR.rotation.y = -0.15;
+    browR.rotation.y = -0.14;
 
-    // Menacing glowing amber eyes
-    this.eyeL = S(new THREE.SphereGeometry(0.32, 16, 12), this.eyeMat, -0.88, 0.62, 1.5);
-    this.eyeR = S(new THREE.SphereGeometry(0.32, 16, 12), this.eyeMat, 0.88, 0.62, 1.5);
+    // Deep-set glowing predator eyes nestled beneath the heavy brow
+    this.eyeL = S(new THREE.SphereGeometry(0.32, 16, 12), this.eyeMat, -0.96, 0.45, 1.15);
+    this.eyeR = S(new THREE.SphereGeometry(0.32, 16, 12), this.eyeMat, 0.96, 0.45, 1.15);
 
-    this.head.add(skull, snout, nostrilL, nostrilR, browL, browR, this.eyeL, this.eyeR);
+    this.head.add(nostrilL, nostrilR, browL, browR, this.eyeL, this.eyeR);
 
     // Upper predator fangs
-    const toothGeo = new THREE.ConeGeometry(0.12, 0.65, 8);
-    toothGeo.translate(0, -0.3, 0);
+    const toothGeo = new THREE.ConeGeometry(0.13, 0.7, 8);
+    toothGeo.translate(0, -0.32, 0);
     for (let i = 0; i < 9; i++) {
       const a = (i / 8 - 0.5) * 1.8;
       const tooth = S(toothGeo, this.teethMat,
-        Math.sin(a) * 1.25, -0.38, 2.2 + Math.cos(a) * 1.25);
+        Math.sin(a) * 1.25, -0.15, 1.8 + Math.cos(a) * 1.25);
       tooth.rotation.x = Math.PI - 0.18;
       tooth.rotation.z = a * 0.28;
       this.head.add(tooth);
     }
 
-    // Articulated Lower Jaw
+    // Articulated Lower Jaw (Pivots at jaw joint)
     this.jaw = new THREE.Group();
-    this.jaw.position.set(0, -0.45, -0.1);
+    this.jaw.position.set(0, -0.25, 0.1);
     this.head.add(this.jaw);
 
-    const jawBase = S(new THREE.SphereGeometry(1.25, 20, 14), this.skinMat, 0, -0.18, 2.1);
-    jawBase.scale.set(0.95, 0.52, 1.4);
-    this.jaw.add(jawBase);
+    const jawGeo = this.createJawGeometry();
+    this.jawMesh = new THREE.Mesh(jawGeo, this.skinMat);
+    this.jawMesh.castShadow = true;
+    this.jawMesh.receiveShadow = true;
+    this.jaw.add(this.jawMesh);
 
-    // Tongue & Throat
-    const tongue = S(new THREE.SphereGeometry(0.55, 14, 10), new THREE.MeshStandardMaterial({
+    // Tongue & Deep Throat
+    const tongue = S(new THREE.SphereGeometry(0.6, 14, 10), new THREE.MeshStandardMaterial({
       color: 0x3d1414, roughness: 0.5
-    }), 0, 0.1, 1.7);
-    tongue.scale.set(0.85, 0.2, 1.4);
+    }), 0, -0.05, 1.6);
+    tongue.scale.set(0.85, 0.22, 1.4);
     this.jaw.add(tongue);
 
     // Lower predator fangs
     for (let i = 0; i < 7; i++) {
       const a = (i / 6 - 0.5) * 1.45;
       const tooth = S(toothGeo, this.teethMat,
-        Math.sin(a) * 1.05, 0.22, 2.0 + Math.cos(a) * 1.05);
+        Math.sin(a) * 1.05, 0.18, 1.7 + Math.cos(a) * 1.05);
       tooth.rotation.x = 0.22;
       tooth.rotation.z = -a * 0.25;
       this.jaw.add(tooth);
     }
 
     this.jawTip = new THREE.Object3D();
-    this.jawTip.position.set(0, -0.1, 3.8);
+    this.jawTip.position.set(0, -0.1, 3.3);
     this.jaw.add(this.jawTip);
+
+    // Internal throat fire light
+    this.mouthLight = new THREE.PointLight(0xff7722, 0, 80, 1.7);
+    this.mouthLight.position.set(0, 0, 2.2);
+    this.head.add(this.mouthLight);
 
     // Core heat light illuminating ground beneath Godzilla
     this.heatLight = new THREE.PointLight(0xff5511, 140, 90, 1.8);
     this.heatLight.position.set(0, 11, 0);
     this.body.add(this.heatLight);
 
-    // Throat fire light
-    this.mouthLight = new THREE.PointLight(0xff7722, 0, 80, 1.7);
-    this.mouthLight.position.set(0, 0, 2.4);
-    this.head.add(this.mouthLight);
-
-    // ---------- Iconic Multi-Row Serrated Maple-Leaf Dorsal Plates ----------
-    const plateGeo = this.createDorsalPlateGeometry();
+    // ---------- Iconic Multi-Row Serrated Coral/Maple-Leaf Dorsal Plates ----------
+    const plateGeo = this.createMovieDorsalPlateGeometry();
 
     this.spines = [];
 
-    // Central Row: Massive jagged plates from nape to lower spine
+    // Central Main Crest: 13 towering massive jagged plates running from neck to mid-tail
     const centralPlates = [
-      [0, 20.2, -0.8, 1.1, -0.22],
-      [0, 19.2, -1.9, 1.45, -0.18],
-      [0, 18.0, -3.0, 1.85, -0.15],
-      [0, 16.2, -3.8, 2.15, -0.12],
-      [0, 14.1, -4.1, 2.25, -0.08],
-      [0, 12.0, -3.9, 2.05, -0.04],
-      [0, 10.0, -3.5, 1.75, 0.0],
-      [0, 8.4, -3.2, 1.45, 0.05]
+      [0, 21.4, 0.0, 0.95, -0.25], // Occipital crest at skull base
+      [0, 20.4, -0.7, 1.25, -0.22],
+      [0, 19.4, -1.8, 1.65, -0.18],
+      [0, 18.2, -2.9, 2.15, -0.15],
+      [0, 16.4, -3.7, 2.55, -0.12], // Peak over shoulders
+      [0, 14.3, -4.0, 2.65, -0.08],
+      [0, 12.1, -3.9, 2.45, -0.04],
+      [0, 10.1, -3.5, 2.15, 0.0],
+      [0, 8.4, -3.2, 1.75, 0.05]
     ];
 
     for (const [x, y, z, s, rx] of centralPlates) {
@@ -219,76 +215,81 @@ export class Godzilla {
       sp.position.set(x, y, z);
       sp.rotation.y = Math.PI / 2;
       sp.rotation.z = -rx;
-      sp.scale.set(s * 0.75, s, s * 0.22);
+      sp.scale.set(s * 0.8, s, s * 0.24);
       sp.castShadow = true;
       this.body.add(sp);
       this.spines.push(sp);
     }
 
-    // Left & Right Flanking Rows: Staggered secondary fins
+    // Left & Right Flanking Rows: 12 secondary jagged plates providing 3D volume
     const flankPlates = [
-      [18.7, -1.7, 0.95],
-      [17.1, -2.8, 1.25],
-      [15.2, -3.4, 1.45],
-      [13.4, -3.6, 1.40],
-      [11.5, -3.3, 1.20],
-      [9.6, -2.8, 0.95]
+      [18.9, -1.6, 1.15],
+      [17.3, -2.7, 1.45],
+      [15.4, -3.3, 1.75],
+      [13.5, -3.5, 1.70],
+      [11.6, -3.2, 1.45],
+      [9.7, -2.7, 1.15]
     ];
 
     for (const [y, z, s] of flankPlates) {
       // Left fin
       const spL = new THREE.Mesh(plateGeo, this.spineMat);
-      spL.position.set(-1.05, y, z);
-      spL.rotation.y = Math.PI / 2 + 0.22;
+      spL.position.set(-1.15, y, z);
+      spL.rotation.y = Math.PI / 2 + 0.24;
       spL.rotation.x = -0.18;
-      spL.scale.set(s * 0.65, s * 0.82, s * 0.18);
+      spL.scale.set(s * 0.7, s * 0.85, s * 0.2);
       spL.castShadow = true;
       this.body.add(spL);
       this.spines.push(spL);
 
       // Right fin
       const spR = new THREE.Mesh(plateGeo, this.spineMat);
-      spR.position.set(1.05, y, z);
-      spR.rotation.y = Math.PI / 2 - 0.22;
+      spR.position.set(1.15, y, z);
+      spR.rotation.y = Math.PI / 2 - 0.24;
       spR.rotation.x = 0.18;
-      spR.scale.set(s * 0.65, s * 0.82, s * 0.18);
+      spR.scale.set(s * 0.7, s * 0.85, s * 0.2);
       spR.castShadow = true;
       this.body.add(spR);
       this.spines.push(spR);
     }
 
-    // ---------- Muscular Predatory Arms & Forward-Reaching Claws ----------
+    // ---------- Muscular Brawler Arms & Claws ----------
     this.armL = this.buildArm(-1);
     this.armR = this.buildArm(1);
 
-    // ---------- Muscular Dinosaurian Legs & Talons ----------
+    // ---------- Colossal Dinosaurian Pillars of Legs & Talons ----------
     this.legL = this.buildLeg(-1);
     this.legR = this.buildLeg(1);
 
-    // ---------- 14-Segment Articulated Serpentine Tail ----------
+    // ---------- 14-Segment Articulated Armored Tail ----------
+    // Uses tapered cylinders with overlapping scute collars (No spherical beads)
     this.tailSegs = [];
     let parent = this.body;
     let px = 0, py = 8.6, pz = -3.2;
-    const tailRadii = [2.4, 2.2, 2.0, 1.8, 1.6, 1.4, 1.2, 1.0, 0.85, 0.7, 0.55, 0.42, 0.32, 0.22];
+    const tailRadii = [2.5, 2.3, 2.1, 1.9, 1.7, 1.5, 1.3, 1.1, 0.9, 0.75, 0.6, 0.45, 0.35, 0.25];
 
     for (let i = 0; i < tailRadii.length; i++) {
       const pivot = new THREE.Group();
       if (i === 0) pivot.position.set(px, py, pz);
-      else pivot.position.set(0, 0, -2.6);
+      else pivot.position.set(0, 0, -2.4);
       parent.add(pivot);
 
-      const r = tailRadii[i];
-      const seg = S(new THREE.SphereGeometry(r, 18, 14), this.skinMat, 0, 0, -1.3);
-      seg.scale.set(1.0, 0.92, 1.45);
-      pivot.add(seg);
+      const rTop = tailRadii[i];
+      const rBot = (i + 1 < tailRadii.length) ? tailRadii[i + 1] : rTop * 0.65;
+      const segLength = 2.5;
+
+      const segGeo = new THREE.CylinderGeometry(rBot, rTop, segLength, 18, 1, false);
+      segGeo.rotateX(Math.PI / 2);
+      const segMesh = S(segGeo, this.skinMat, 0, 0, -segLength / 2);
+      pivot.add(segMesh);
 
       if (i < 11) {
         const tsp = new THREE.Mesh(plateGeo, this.spineMat);
-        tsp.position.set(0, r * 0.88, -1.1);
-        const ts = Math.max(0.4, r * 0.7);
+        tsp.position.set(0, rTop * 0.88, -segLength / 2);
+        const ts = Math.max(0.45, rTop * 0.75);
         tsp.rotation.y = Math.PI / 2;
         tsp.rotation.z = -0.15;
-        tsp.scale.set(ts * 0.7, ts, ts * 0.2);
+        tsp.scale.set(ts * 0.75, ts, ts * 0.22);
         tsp.castShadow = true;
         pivot.add(tsp);
         this.spines.push(tsp);
@@ -317,39 +318,261 @@ export class Godzilla {
     this._v2 = new THREE.Vector3();
   }
 
-  createDorsalPlateGeometry() {
+  // Lofted continuous muscular torso geometry (Zero spherical seams)
+  createLoftedTorsoGeometry() {
+    const rings = [
+      { y: 21.6, z: 0.8, rx: 1.6, rz: 1.7 },  // Base of skull collar
+      { y: 20.4, z: 0.9, rx: 1.9, rz: 2.1 },  // Upper bull neck
+      { y: 19.3, z: 0.9, rx: 2.3, rz: 2.5 },  // Mid bull neck
+      { y: 18.2, z: 0.8, rx: 2.7, rz: 2.9 },  // Base of neck
+      { y: 17.0, z: 0.6, rx: 3.2, rz: 3.4 },  // Trapezius hump & shoulder line
+      { y: 15.6, z: 0.3, rx: 3.8, rz: 3.9 },  // Broadest pectoral chest
+      { y: 14.2, z: 0.0, rx: 3.7, rz: 3.8 },  // Ribcage
+      { y: 12.8, z: -0.1, rx: 3.5, rz: 3.6 }, // Upper abdomen
+      { y: 11.5, z: -0.2, rx: 3.4, rz: 3.5 }, // Abdomen / gastralia
+      { y: 10.3, z: -0.3, rx: 3.7, rz: 3.8 }, // Ilium / upper hips
+      { y: 9.0,  z: -0.5, rx: 4.1, rz: 4.2 }, // Widest pelvis / hip joints
+      { y: 7.8,  z: -0.7, rx: 3.8, rz: 3.9 }, // Lower pelvis
+      { y: 6.8,  z: -0.9, rx: 3.0, rz: 3.3 }, // Groin & tail base
+      { y: 6.0,  z: -1.0, rx: 1.8, rz: 2.2 }  // Base cap
+    ];
+
+    const radialSegments = 24;
+    const numRings = rings.length;
+    const numVertices = numRings * (radialSegments + 1) + 2;
+
+    const positions = new Float32Array(numVertices * 3);
+    const uvs = new Float32Array(numVertices * 2);
+    const indices = [];
+
+    let vIdx = 0;
+    for (let r = 0; r < numRings; r++) {
+      const ring = rings[r];
+      const v = r / (numRings - 1);
+      for (let s = 0; s <= radialSegments; s++) {
+        const u = s / radialSegments;
+        const theta = u * Math.PI * 2;
+        const cos = Math.cos(theta);
+        const sin = Math.sin(theta);
+
+        const px = sin * ring.rx;
+        const pz = ring.z + cos * ring.rz;
+        const py = ring.y;
+
+        positions[vIdx * 3] = px;
+        positions[vIdx * 3 + 1] = py;
+        positions[vIdx * 3 + 2] = pz;
+
+        uvs[vIdx * 2] = u * 3;
+        uvs[vIdx * 2 + 1] = v * 4;
+        vIdx++;
+      }
+    }
+
+    for (let r = 0; r < numRings - 1; r++) {
+      for (let s = 0; s < radialSegments; s++) {
+        const a = r * (radialSegments + 1) + s;
+        const b = (r + 1) * (radialSegments + 1) + s;
+        const c = (r + 1) * (radialSegments + 1) + (s + 1);
+        const d = r * (radialSegments + 1) + (s + 1);
+
+        indices.push(a, b, d);
+        indices.push(b, c, d);
+      }
+    }
+
+    // Watertight top collar cap
+    const topCap = vIdx;
+    positions[topCap * 3] = 0;
+    positions[topCap * 3 + 1] = rings[0].y;
+    positions[topCap * 3 + 2] = rings[0].z;
+    uvs[topCap * 2] = 0.5;
+    uvs[topCap * 2 + 1] = 0;
+    vIdx++;
+    for (let s = 0; s < radialSegments; s++) {
+      indices.push(topCap, s, s + 1);
+    }
+
+    // Watertight bottom pelvis cap
+    const botCap = vIdx;
+    const botStart = (numRings - 1) * (radialSegments + 1);
+    positions[botCap * 3] = 0;
+    positions[botCap * 3 + 1] = rings[numRings - 1].y;
+    positions[botCap * 3 + 2] = rings[numRings - 1].z;
+    uvs[botCap * 2] = 0.5;
+    uvs[botCap * 2 + 1] = 1;
+    for (let s = 0; s < radialSegments; s++) {
+      indices.push(botCap, botStart + s + 1, botStart + s);
+    }
+
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geo.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
+    geo.setIndex(indices);
+    geo.computeVertexNormals();
+    return geo;
+  }
+
+  // Sculpted Crocodilian Cranium & Snout Geometry
+  createHeadGeometry() {
+    const rings = [
+      { z: -1.4, y: 0.4, rx: 1.8, ry: 1.7 }, // Back of skull
+      { z: -0.7, y: 0.5, rx: 1.95, ry: 1.8 }, // Cranium
+      { z: 0.0,  y: 0.5, rx: 1.85, ry: 1.7 }, // Mid skull
+      { z: 0.8,  y: 0.45, rx: 1.65, ry: 1.5 }, // Brow / eyes
+      { z: 1.5,  y: 0.35, rx: 1.45, ry: 1.2 }, // Mid snout
+      { z: 2.2,  y: 0.25, rx: 1.25, ry: 0.95 }, // Anterior snout
+      { z: 2.8,  y: 0.15, rx: 0.95, ry: 0.75 }, // Snout tip
+      { z: 3.1,  y: 0.08, rx: 0.3, ry: 0.3 }   // Rounded nose tip
+    ];
+
+    const radialSegments = 20;
+    const numRings = rings.length;
+    const numVertices = numRings * (radialSegments + 1);
+
+    const positions = new Float32Array(numVertices * 3);
+    const uvs = new Float32Array(numVertices * 2);
+    const indices = [];
+
+    let vIdx = 0;
+    for (let r = 0; r < numRings; r++) {
+      const ring = rings[r];
+      const v = r / (numRings - 1);
+      for (let s = 0; s <= radialSegments; s++) {
+        const u = s / radialSegments;
+        const theta = u * Math.PI * 2;
+        const cos = Math.cos(theta);
+        const sin = Math.sin(theta);
+
+        const px = sin * ring.rx;
+        const py = ring.y + cos * ring.ry;
+        const pz = ring.z;
+
+        positions[vIdx * 3] = px;
+        positions[vIdx * 3 + 1] = py;
+        positions[vIdx * 3 + 2] = pz;
+
+        uvs[vIdx * 2] = u * 2;
+        uvs[vIdx * 2 + 1] = v * 2;
+        vIdx++;
+      }
+    }
+
+    for (let r = 0; r < numRings - 1; r++) {
+      for (let s = 0; s < radialSegments; s++) {
+        const a = r * (radialSegments + 1) + s;
+        const b = (r + 1) * (radialSegments + 1) + s;
+        const c = (r + 1) * (radialSegments + 1) + (s + 1);
+        const d = r * (radialSegments + 1) + (s + 1);
+
+        indices.push(a, b, d);
+        indices.push(b, c, d);
+      }
+    }
+
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geo.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
+    geo.setIndex(indices);
+    geo.computeVertexNormals();
+    return geo;
+  }
+
+  // Sculpted Articulated Lower Jaw Geometry
+  createJawGeometry() {
+    const rings = [
+      { z: -0.4, y: -0.3, rx: 1.6, ry: 0.65 }, // Jaw hinge & jowls
+      { z: 0.4,  y: -0.35, rx: 1.45, ry: 0.65 },
+      { z: 1.3,  y: -0.35, rx: 1.25, ry: 0.6 },
+      { z: 2.1,  y: -0.3, rx: 1.05, ry: 0.55 },
+      { z: 2.7,  y: -0.22, rx: 0.75, ry: 0.45 },
+      { z: 3.0,  y: -0.15, rx: 0.25, ry: 0.25 }  // Chin tip
+    ];
+
+    const radialSegments = 18;
+    const numRings = rings.length;
+    const numVertices = numRings * (radialSegments + 1);
+
+    const positions = new Float32Array(numVertices * 3);
+    const uvs = new Float32Array(numVertices * 2);
+    const indices = [];
+
+    let vIdx = 0;
+    for (let r = 0; r < numRings; r++) {
+      const ring = rings[r];
+      const v = r / (numRings - 1);
+      for (let s = 0; s <= radialSegments; s++) {
+        const u = s / radialSegments;
+        const theta = u * Math.PI * 2;
+        const cos = Math.cos(theta);
+        const sin = Math.sin(theta);
+
+        const px = sin * ring.rx;
+        const py = ring.y + cos * ring.ry;
+        const pz = ring.z;
+
+        positions[vIdx * 3] = px;
+        positions[vIdx * 3 + 1] = py;
+        positions[vIdx * 3 + 2] = pz;
+
+        uvs[vIdx * 2] = u * 2;
+        uvs[vIdx * 2 + 1] = v * 2;
+        vIdx++;
+      }
+    }
+
+    for (let r = 0; r < numRings - 1; r++) {
+      for (let s = 0; s < radialSegments; s++) {
+        const a = r * (radialSegments + 1) + s;
+        const b = (r + 1) * (radialSegments + 1) + s;
+        const c = (r + 1) * (radialSegments + 1) + (s + 1);
+        const d = r * (radialSegments + 1) + (s + 1);
+
+        indices.push(a, b, d);
+        indices.push(b, c, d);
+      }
+    }
+
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geo.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
+    geo.setIndex(indices);
+    geo.computeVertexNormals();
+    return geo;
+  }
+
+  // Iconic jagged coral/maple-leaf dorsal plate silhouette
+  createMovieDorsalPlateGeometry() {
     const s = new THREE.Shape();
     s.moveTo(0, 0);
-    s.lineTo(0.35, 0.35);
-    s.lineTo(0.75, 0.45);
-    s.lineTo(0.5, 0.95);
-    s.lineTo(0.95, 1.25);
-    s.lineTo(0.6, 1.75);
-    s.lineTo(0.9, 2.2);
-    s.lineTo(0.45, 2.6);
-    s.lineTo(0.55, 3.1);
-    s.lineTo(0.15, 3.45);
-    s.lineTo(0.0, 3.8); // Tall central tip
-    s.lineTo(-0.15, 3.45);
-    s.lineTo(-0.55, 3.1);
-    s.lineTo(-0.45, 2.6);
-    s.lineTo(-0.9, 2.2);
-    s.lineTo(-0.6, 1.75);
-    s.lineTo(-0.95, 1.25);
-    s.lineTo(-0.5, 0.95);
-    s.lineTo(-0.75, 0.45);
-    s.lineTo(-0.35, 0.35);
+    s.lineTo(0.4, 0.4);
+    s.lineTo(0.9, 0.5);   // Lower front prong
+    s.lineTo(0.6, 1.1);
+    s.lineTo(1.2, 1.4);   // Mid front prong
+    s.lineTo(0.75, 2.0);
+    s.lineTo(1.1, 2.5);   // High front prong
+    s.lineTo(0.5, 3.0);
+    s.lineTo(0.65, 3.6);  // Sub-crest
+    s.lineTo(0.2, 4.0);
+    s.lineTo(0.0, 4.5);   // Central towering pinnacle!
+    s.lineTo(-0.2, 4.0);
+    s.lineTo(-0.65, 3.6); // Sub-crest rear
+    s.lineTo(-0.5, 3.0);
+    s.lineTo(-1.1, 2.5);  // High rear prong
+    s.lineTo(-0.75, 2.0);
+    s.lineTo(-1.2, 1.4);  // Mid rear prong
+    s.lineTo(-0.6, 1.1);
+    s.lineTo(-0.9, 0.5);  // Lower rear prong
+    s.lineTo(-0.4, 0.4);
     s.closePath();
 
-    const extrudeSettings = {
-      steps: 1,
-      depth: 0.28,
+    const geo = new THREE.ExtrudeGeometry(s, {
+      depth: 0.3,
       bevelEnabled: true,
-      bevelThickness: 0.14,
-      bevelSize: 0.12,
+      bevelThickness: 0.15,
+      bevelSize: 0.14,
       bevelSegments: 2
-    };
-    const geo = new THREE.ExtrudeGeometry(s, extrudeSettings);
+    });
     geo.center();
     return geo;
   }
@@ -364,27 +587,40 @@ export class Godzilla {
     };
 
     const shoulder = new THREE.Group();
-    shoulder.position.set(side * 3.3, 15.6, 1.2);
+    shoulder.position.set(side * 3.4, 15.6, 1.2);
     this.body.add(shoulder);
 
+    // Muscular Deltoid / Shoulder Mass
+    const deltoid = g(new THREE.SphereGeometry(1.25, 16, 14), this.skinMat, 0, 0, 0);
+    deltoid.scale.set(1.1, 1.2, 1.05);
+    shoulder.add(deltoid);
+
     // Powerful Upper Arm (Deltoid & Bicep)
-    const upperArm = g(new THREE.CylinderGeometry(0.8, 1.0, 3.2, 16), this.skinMat, 0, -1.5, 0);
+    const upperArm = g(new THREE.CylinderGeometry(0.85, 1.1, 3.2, 16), this.skinMat, 0, -1.5, 0);
     shoulder.add(upperArm);
 
     const elbow = new THREE.Group();
     elbow.position.set(0, -3.0, 0);
     shoulder.add(elbow);
 
+    // Articulated Elbow Joint
+    const elbowJoint = g(new THREE.SphereGeometry(0.8, 14, 12), this.skinMat, 0, 0, 0);
+    elbow.add(elbowJoint);
+
     // Muscular Forearm reaching forward aggressively
-    const forearm = g(new THREE.CylinderGeometry(0.65, 0.82, 2.8, 16), this.skinMat, 0, -1.2, 0.8);
+    const forearm = g(new THREE.CylinderGeometry(0.7, 0.9, 2.8, 16), this.skinMat, 0, -1.2, 0.8);
     forearm.rotation.x = 0.75;
     elbow.add(forearm);
 
+    // Wrist & Hand Mass
+    const wrist = g(new THREE.SphereGeometry(0.75, 14, 10), this.skinMat, 0, -2.1, 1.5);
+    elbow.add(wrist);
+
     // Hand & 4 Spread Predator Talons reaching forward
-    const clawGeo = new THREE.ConeGeometry(0.18, 0.95, 8);
+    const clawGeo = new THREE.ConeGeometry(0.2, 1.05, 8);
     for (let c = 0; c < 4; c++) {
       const claw = g(clawGeo, this.clawMat,
-        (c - 1.5) * 0.4, -2.2, 1.9 + Math.sin(c * 0.9) * 0.15);
+        (c - 1.5) * 0.42, -2.2, 1.9 + Math.sin(c * 0.9) * 0.15);
       claw.rotation.x = Math.PI * 0.45;
       elbow.add(claw);
     }
@@ -405,12 +641,17 @@ export class Godzilla {
     };
 
     const hip = new THREE.Group();
-    hip.position.set(side * 2.3, 8.8, -0.3);
+    hip.position.set(side * 2.5, 8.8, -0.4);
     this.body.add(hip);
 
-    // Muscular Thigh
-    const thigh = g(new THREE.CylinderGeometry(1.45, 1.95, 4.8, 18), this.skinMat, 0, -2.2, 0);
-    thigh.scale.set(1.15, 1.0, 1.2);
+    // Hip Socket Muscular Bulge
+    const hipJoint = g(new THREE.SphereGeometry(2.0, 18, 14), this.skinMat, 0, 0, 0);
+    hipJoint.scale.set(1.15, 1.2, 1.25);
+    hip.add(hipJoint);
+
+    // Massive Tree-Trunk Muscular Thigh
+    const thigh = g(new THREE.CylinderGeometry(1.6, 2.1, 4.8, 20), this.skinMat, 0, -2.2, 0);
+    thigh.scale.set(1.2, 1.0, 1.3);
     hip.add(thigh);
 
     const knee = new THREE.Group();
@@ -418,44 +659,44 @@ export class Godzilla {
     hip.add(knee);
 
     // Armored Kneecap Plate
-    const kneeCap = g(new THREE.SphereGeometry(0.9, 14, 10), this.skinMat, 0, 0.2, 1.35);
+    const kneeCap = g(new THREE.SphereGeometry(1.0, 16, 12), this.skinMat, 0, 0.2, 1.45);
     kneeCap.scale.set(0.9, 0.85, 0.65);
     knee.add(kneeCap);
 
     // Muscular Calf / Lower Leg
-    const shin = g(new THREE.CylinderGeometry(1.1, 1.5, 4.4, 18), this.skinMat, 0, -2.0, 0);
-    shin.scale.set(1.05, 1.0, 1.15);
+    const shin = g(new THREE.CylinderGeometry(1.2, 1.65, 4.4, 20), this.skinMat, 0, -2.0, 0);
+    shin.scale.set(1.1, 1.0, 1.2);
     knee.add(shin);
 
     // Ankle / Metatarsal Base
-    const ankle = g(new THREE.BoxGeometry(2.4, 1.4, 2.6), this.skinMat, 0, -3.8, 0.4);
+    const ankle = g(new THREE.BoxGeometry(2.6, 1.4, 2.8), this.skinMat, 0, -3.8, 0.4);
     knee.add(ankle);
 
-    // Three Realistic Theropod Front Toes with Black Curved Talons
-    const toeGeo = new THREE.BoxGeometry(0.7, 0.9, 2.0);
-    const talonGeo = new THREE.ConeGeometry(0.3, 1.3, 8);
-    talonGeo.translate(0, 0.65, 0);
+    // Three Realistic Dinosaurian Front Toes with Curved Talons
+    const toeGeo = new THREE.BoxGeometry(0.75, 0.95, 2.2);
+    const talonGeo = new THREE.ConeGeometry(0.35, 1.4, 8);
+    talonGeo.translate(0, 0.7, 0);
 
-    const toeAngles = [-0.26, 0, 0.26];
+    const toeAngles = [-0.28, 0, 0.28];
     for (let c = 0; c < 3; c++) {
       const a = toeAngles[c];
-      const ox = (c - 1) * 0.95;
+      const ox = (c - 1) * 1.0;
 
-      const toe = g(toeGeo, this.skinMat, ox, -4.1, 1.9);
+      const toe = g(toeGeo, this.skinMat, ox, -4.1, 2.0);
       toe.rotation.y = a;
       knee.add(toe);
 
       const talon = g(talonGeo, this.clawMat,
-        ox + Math.sin(a) * 1.5, -4.2, 2.7 + Math.cos(a) * 0.9);
+        ox + Math.sin(a) * 1.6, -4.2, 2.8 + Math.cos(a) * 0.95);
       talon.rotation.x = Math.PI / 2 + 0.15;
       talon.rotation.y = a;
       knee.add(talon);
     }
 
     // Rear Heel Dewclaw
-    const heelTalon = g(talonGeo, this.clawMat, 0, -4.0, -1.3);
+    const heelTalon = g(talonGeo, this.clawMat, 0, -4.0, -1.4);
     heelTalon.rotation.x = -Math.PI / 2 - 0.2;
-    heelTalon.scale.set(0.75, 0.75, 0.75);
+    heelTalon.scale.set(0.8, 0.8, 0.8);
     knee.add(heelTalon);
 
     return { hip, knee, side };
@@ -478,7 +719,7 @@ export class Godzilla {
   }
 
   footWorld(leg, out) {
-    out.set(0, -4.2, 1.5);
+    out.set(0, -4.2, 1.6);
     return leg.knee.localToWorld(out);
   }
 
@@ -530,17 +771,17 @@ export class Godzilla {
     this.body.position.y = Math.abs(Math.cos(this.walkPhase)) * 0.75 * moving
       + Math.sin(this.time * 1.2) * 0.2 - crouch;
     this.body.rotation.z = Math.sin(this.walkPhase) * 0.04 * (0.35 + moving);
-    this.body.rotation.x = 0.12 + moving * 0.065 - crouch * 0.035 + roarK * -0.09;
+    this.body.rotation.x = 0.14 + moving * 0.065 - crouch * 0.035 + roarK * -0.09;
 
     // Breathing ribcage expansion
     const breathe = 1 + Math.sin(this.time * 2.2) * 0.012;
-    this.chest.scale.set(1.15 * breathe, 1.05 * breathe, 1.0 * breathe);
+    this.torsoMesh.scale.set(1.0 * breathe, 1.0 * breathe, 1.0 * breathe);
 
     // Arms counter-swing with predatory claw tension
-    this.armL.shoulder.rotation.x = 0.45 - s * 0.42 * amp;
-    this.armR.shoulder.rotation.x = 0.45 + s * 0.42 * amp;
-    this.armL.shoulder.rotation.z = -0.28 + Math.sin(this.time * 2) * 0.04;
-    this.armR.shoulder.rotation.z = 0.28 - Math.sin(this.time * 2) * 0.04;
+    this.armL.shoulder.rotation.x = 0.35 - s * 0.42 * amp;
+    this.armR.shoulder.rotation.x = 0.35 + s * 0.42 * amp;
+    this.armL.shoulder.rotation.z = -0.25 + Math.sin(this.time * 2) * 0.04;
+    this.armR.shoulder.rotation.z = 0.25 - Math.sin(this.time * 2) * 0.04;
 
     // Tail: Dynamic serpentine traveling wave that reacts to walking momentum & drag
     for (let i = 0; i < this.tailSegs.length; i++) {
@@ -563,7 +804,6 @@ export class Godzilla {
     this.jaw.rotation.x += (targetJaw - this.jaw.rotation.x) * Math.min(1, dt * (this.beamOn ? 8.5 : 4.5));
 
     // ---------- Thermonuclear Energy Charge & Dorsal Fin Glow ----------
-    // Spines stay dark obsidian at rest (0.15), surge to blinding nuclear blaze (4.2) on beam!
     const targetGlow = 0.15 + (this.beamOn ? 4.2 : 0) + roarK * 1.8;
     this.charge += (targetGlow - this.charge) * Math.min(1, dt * (this.beamOn ? 4.0 : 5.0));
 
@@ -576,7 +816,7 @@ export class Godzilla {
     this.bellyMat.emissiveIntensity = 0.06 + heatPulse * 0.5 + roarK * 0.4 + (this.beamOn ? 0.9 : 0);
 
     // Dynamic creature heat lights
-    this.heatLight.intensity = 110 + Math.sin(this.time * 24) * 30 + this.charge * 160;
+    this.heatLight.intensity = 140 + Math.sin(this.time * 24) * 30 + this.charge * 160;
     this.mouthLight.intensity = roarK * 280 + (this.beamOn ? 700 : 0);
 
     // Natural reptilian eye blinking
