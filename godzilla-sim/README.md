@@ -19,14 +19,14 @@ Firefox. Internet access is required once per load for the three.js CDN
 
 ## Controls
 
-- **WASD / arrows** — move (camera-relative), **Shift** — run
-- **Mouse drag** — orbit, wheel zooms
-- **R** — roar (jaw, spine flash, shockwave, synthesized cry)
-- **F (hold)** — atomic breath beam, drains atomic energy
-- **Space** — seismic stomp, damages nearby towers
-- **C** — camera: Orbit / Follow / Cinematic / Top
-- **N** — day/night, **P** — rain toggle
-- On-screen buttons mirror every action for touch screens.
+- **WASD / arrows / on-screen D-Pad** — true camera-relative directional movement, **Shift** — run
+- **Mouse drag** — orbit camera, wheel zooms
+- **R / Roar button** — roar (jaw snaps open, spine flash, shockwave, synthesized FM growl)
+- **F (hold) / Breath button** — thermonuclear atomic breath beam, drains energy and explodes on contact
+- **Space / Stomp button** — seismic stomp, damages nearby towers with ground shockwaves
+- **C / Camera button** — camera modes: Orbit / Follow / Cinematic / Top
+- **N / Day-Night button** — day/night atmospheric cycle, **P** — rain toggle
+- On-screen D-Pad & action buttons mirror every action for mobile & touch screens.
 
 ## Files
 
