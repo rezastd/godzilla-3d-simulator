@@ -1,0 +1,90 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: #05070c; }
+body { font-family: "Helvetica Neue", Arial, sans-serif; color: #dfe8f2; }
+#app, #app canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+.hidden { display: none !important; }
+
+/* Loading screen */
+#loading {
+  position: fixed; inset: 0; z-index: 50;
+  display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(ellipse at 50% 70%, #0d1626 0%, #05070c 70%);
+}
+.load-box { text-align: center; }
+.load-title { font-size: 64px; font-weight: 900; letter-spacing: 14px; color: #e8f1ff;
+  text-shadow: 0 0 30px #2e7bff, 0 0 90px #123a8f; }
+.load-sub { font-size: 15px; letter-spacing: 10px; color: #7fa8d8; margin: 6px 0 22px; }
+.load-bar { width: 280px; height: 5px; margin: 0 auto; background: #16233a; border-radius: 3px; overflow: hidden; }
+.load-bar span { display: block; height: 100%; width: 20%; background: #3f9dff; border-radius: 3px;
+  animation: slide 1.1s ease-in-out infinite alternate; }
+@keyframes slide { from { margin-left: 0; } to { margin-left: 80%; } }
+#load-msg { margin-top: 14px; font-size: 13px; color: #8ea6c4; }
+
+/* HUD */
+#vignette {
+  position: fixed; inset: 0; z-index: 5; pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 52%, rgba(10, 2, 2, 0.55) 100%);
+}
+#hud { position: fixed; inset: 0; z-index: 10; pointer-events: none; }
+#title-card {
+  position: absolute; top: 14px; left: 16px;
+  background: rgba(6, 12, 24, 0.62); border: 1px solid rgba(90, 160, 255, 0.35);
+  border-radius: 8px; padding: 8px 14px; backdrop-filter: blur(6px);
+}
+#title-card .k { font-weight: 900; letter-spacing: 6px; font-size: 18px; color: #eaf3ff;
+  text-shadow: 0 0 12px #2e7bff; }
+#title-card .sub { display: block; font-size: 10px; letter-spacing: 5px; color: #7fa8d8; }
+
+#stats {
+  position: absolute; top: 14px; right: 16px; width: 250px;
+  background: rgba(6, 12, 24, 0.62); border: 1px solid rgba(90, 160, 255, 0.35);
+  border-radius: 8px; padding: 10px 12px; backdrop-filter: blur(6px);
+}
+.stat-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.stat-row:last-of-type { margin-bottom: 4px; }
+.stat-row label { font-size: 10px; letter-spacing: 1px; color: #9db8d8; width: 86px; }
+.bar { flex: 1; height: 9px; background: #131d31; border-radius: 5px; overflow: hidden; }
+.bar span { display: block; height: 100%; width: 0%; border-radius: 5px;
+  background: linear-gradient(90deg, #ff9a3c, #ff3c3c); transition: width 0.3s; }
+.bar.energy span { width: 100%; background: linear-gradient(90deg, #27d8ff, #2e7bff); }
+#dest-num { font-size: 12px; font-weight: 700; color: #ffb37a; width: 38px; text-align: right; }
+#cam-label { font-size: 10px; letter-spacing: 2px; color: #6f8cab; margin-top: 2px; }
+
+#help {
+  position: absolute; bottom: 14px; left: 16px; font-size: 12px; line-height: 1.7;
+  color: #9db8d8; background: rgba(6, 12, 24, 0.62);
+  border: 1px solid rgba(90, 160, 255, 0.35); border-radius: 8px;
+  padding: 8px 12px; backdrop-filter: blur(6px);
+}
+#help b { color: #eaf3ff; }
+
+#actions {
+  position: absolute; bottom: 14px; right: 16px;
+  display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end;
+  max-width: 46vw; pointer-events: auto;
+}
+#actions button {
+  font-size: 12px; font-weight: 700; letter-spacing: 1px;
+  color: #eaf3ff; background: rgba(20, 40, 70, 0.78);
+  border: 1px solid rgba(90, 160, 255, 0.55); border-radius: 8px;
+  padding: 10px 14px; cursor: pointer; backdrop-filter: blur(6px);
+}
+#actions button:hover { background: rgba(46, 123, 255, 0.55); }
+#actions button:active, #actions button.held { background: rgba(46, 123, 255, 0.85); }
+#actions button:disabled { opacity: 0.4; cursor: default; }
+
+#toast {
+  position: fixed; top: 76px; left: 50%; transform: translateX(-50%); z-index: 20;
+  font-size: 14px; letter-spacing: 2px; color: #ffe9c9;
+  background: rgba(30, 16, 6, 0.78); border: 1px solid rgba(255, 170, 60, 0.5);
+  border-radius: 8px; padding: 10px 20px; pointer-events: none;
+  transition: opacity 0.4s;
+}
+
+@media (max-width: 720px) {
+  .load-title { font-size: 40px; letter-spacing: 8px; }
+  #help { display: none; }
+  #stats { width: 200px; }
+  #actions { max-width: 60vw; }
+  #actions button { padding: 8px 10px; font-size: 11px; }
+}

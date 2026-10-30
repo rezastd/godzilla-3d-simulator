@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Godzilla 3D Simulator</title>
+<link rel="stylesheet" href="style.css">
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+<div id="app"></div>
+<div id="vignette"></div>
+
+<div id="loading">
+  <div class="load-box">
+    <div class="load-title">GODZILLA</div>
+    <div class="load-sub">3D SIMULATOR</div>
+    <div class="load-bar"><span id="load-fill"></span></div>
+    <div id="load-msg">Waking the King of the Monsters...</div>
+  </div>
+</div>
+
+<div id="hud" class="hidden">
+  <div id="title-card">
+    <span class="k">GODZILLA</span><span class="sub">3D SIMULATOR</span>
+  </div>
+  <div id="stats">
+    <div class="stat-row">
+      <label>DESTRUCTION</label>
+      <div class="bar"><span id="dest-fill"></span></div>
+      <span id="dest-num">0%</span>
+    </div>
+    <div class="stat-row">
+      <label>ATOMIC ENERGY</label>
+      <div class="bar energy"><span id="en-fill"></span></div>
+    </div>
+    <div id="cam-label">CAMERA: ORBIT</div>
+  </div>
+  <div id="help">
+    <b>WASD</b> move &nbsp; <b>Shift</b> run &nbsp; <b>Mouse</b> orbit<br>
+    <b>R</b> roar &nbsp; <b>F</b> atomic breath (hold) &nbsp; <b>Space</b> stomp<br>
+    <b>C</b> camera &nbsp; <b>N</b> day/night &nbsp; <b>P</b> rain
+  </div>
+  <div id="actions">
+    <button id="btn-roar">ROAR</button>
+    <button id="btn-breath">BREATH (hold)</button>
+    <button id="btn-stomp">STOMP</button>
+    <button id="btn-walk">WALK: OFF</button>
+    <button id="btn-cam">CAMERA</button>
+    <button id="btn-day">DAY/NIGHT</button>
+  </div>
+</div>
+
+<div id="toast" class="hidden"></div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
